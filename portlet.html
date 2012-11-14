@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Cybozu Advance</title>
+<link type="text/css" href="jquery/css/redmond/jquery-ui-1.8.6.custom.css" rel="stylesheet" />	
+<link type="text/css" href="jquery/plugins/fullcalendar/fullcalendar.css" rel="stylesheet" />
+<link type="text/css" href="jquery/plugins/jquery-treeview/jquery.treeview.css" rel="stylesheet" />
+<link type="text/css" href="jquery/plugins/jquery-treeview-menu/jquery-treeview-menu.css" rel="stylesheet" />
+<style type="text/css">
+body { font-size: 80%; margin-top: 0; }
+fieldset { margin:0; padding: 0; border:0; }
+div#header { margin-bottom: 1em; padding: 0 0.5em; }
+div#header-right { margin: 0.5em 0; }
+div#header a { padding: .3em .5em; margin-left: .5em; text-decoration: none; }
+img#logo { margin: 0.5em 0; }
+
+div.form-field { margin: 0.5em; }
+label.form-field-label { display:block; }
+input.ui-widget-content { padding: .2em; }
+div.ui-widget-content { padding: .2em; }
+
+div#cal-view { text-align: center; }
+div#cal-view-menubar { margin: 0.5em; }
+table#cal-view-table { width: 100%; border-collapse: collapse; }
+table#cal-view-table th { width: 10%; border: 1px solid #eee; padding: .2em; text-align: right; }
+table#cal-view-table td { border: 1px solid #eee; padding: .2em; text-align: left; font-family: ＭＳ ゴシック; }
+
+div.cal-view-follow-item { margin: 0.5em 0; border-top: 1px solid #eee; }
+div.cal-view-follow-info { margin-top: 0.5em; }
+span.cal-view-follow-creator { font-weight: bold; }
+span.cal-view-follow-created { margin-left: 1em; }
+div.cal-view-follow-text { margin-top: 0.5em; }
+a.cal-view-follow-del { padding: .2em .5em; text-decoration: none; display: block; float: right; }
+
+div.user-calendar { padding: 0.3em 0 0.3em 0; }
+span.user-calendar-name { font-size: larger; }
+.fc-event, .fc-agenda .fc-event-time, .fc-event a { background-color: #9ff; border-color: #366; color: #333; }
+.event-repeat, .fc-agenda .event-repeat .fc-event-time, .event-repeat a { background-color: #fc6; border-color: #363; color: #333; }
+.event-allday, .fc-agenda .event-allday .fc-event-time, .event-allday a { background-color: #fcc; border-color: #366; color: #333; }
+.event-banner, .fc-agenda .event-banner .fc-event-time, .event-banner a { background-color: #cf9; border-color: #636; color: #333; }
+.event-gcal, .fc-agenda .event-gcal .fc-event-time, .event-gcal a { background-color: #36c; border-color: #36c; color: #fff; }
+
+.fc .fc-header { font-size: 0.9em; }
+.fc-agenda-head tr.fc-all-day th { height: 25px; }
+.fc .fc-agenda-body td div { height: 16px; }
+.fc-header .fc-state-default, .fc-header .ui-state-default { margin-bottom: 0; }
+
+#calendar-buttons button { font-size: 0.9em; margin: 0 -3px; padding: 0; }
+</style>
+<script type="text/javascript" src="jquery/js/jquery-1.4.1.min.js"></script>
+<script type="text/javascript" src="jquery/js/jquery-ui-1.8.6.custom.min.js"></script>
+<script type="text/javascript" src="jquery/plugins/fullcalendar/fullcalendar.min.js"></script>
+<script type="text/javascript" src="jquery/plugins/fullcalendar/gcal.js"></script>
+<script type="text/javascript" src="lib/cybozu-connect/utility.js"></script>
+<script type="text/javascript" src="lib/cybozu-connect/core.js"></script>
+<script type="text/javascript" src="lib/cybozu-connect/base.js"></script>
+<script type="text/javascript" src="lib/cybozu-connect/schedule.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/utility.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/login.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/calendar-portlet.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/calendar-dragdrop.js"></script>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        if (window.top == window.self && location.hash == "#frame-only") {
+            location.href = "./index.html";
+            return;
+        }
+
+        // app
+        var app = new CBLabs.CybozuConnect.App(cybozuURL);
+
+        // login
+        var login = new CBLabs.CybozuAdvance.Login({ app: app });
+        login.init("#login-form", function () {
+            var calendar = new CBLabs.CybozuAdvance.CalendarPortlet({ app: app, elementId: "cal" });
+            calendar.initEvents();
+
+            $("#group-week").button().click(function () { calendar.navigateTo("page-cal-group-week"); });
+            $("#personal-month").button().click(function () { calendar.navigateTo("page-cal-month"); });
+            $("#personal-week").button().click(function () { calendar.navigateTo("page-cal-week"); });
+            $("#personal-day").button().click(function () { calendar.navigateTo("page-cal-day"); });
+            $("#calendar-buttons").css("display", "").buttonset();
+        });
+    });
+
+</script>
+</head>
+<body>
+
+<div style="position: absolute;">
+<span id="calendar-buttons" style="display: none;">
+<button id="group-week" style="width: 8em;">グループ週</button>
+<button id="personal-month">月</button>
+<button id="personal-week">週</button>
+<button id="personal-day">日</button>
+</span>
+</div>
+<div id="cal"></div>
+
+<div id="login-form" title="ログイン" style="display: none">
+	<form>
+        <div class="form-field">
+		<label for="name" class="form-field-label">ログイン名</label>
+		<input type="text" name="name" id="login-form-username" class="ui-widget-content ui-corner-all" />
+        </div>
+        <div class="form-field">
+		<label for="password" class="form-field-label">パスワード</label>
+		<input type="password" name="password" id="login-form-password" value="" class="ui-widget-content ui-corner-all" />
+        </div>
+	</form>
+</div>
+
+<div id="simple-confirm" title="" style="display: none;">
+    <p>
+        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+        <span id="simple-confirm-message"></span>
+    </p>
+</div>
+
+<div id="simple-loading" title="" style="display: none;">
+    <p style="text-align: center;">
+        <img src="lib/cybozu-advance/images/loading.gif" align="absmiddle" />
+        <span id="simple-loading-message"></span>
+    </p>
+</div>
+
+<div id="cal-modify-repeat-confirm" title="" style="display: none;">
+    <p>
+        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+        <span id="cal-modify-message"></span>
+    </p>
+    <form>
+    <fieldset>
+        <div class="form-field">
+        <div style="display: none;"><input type="radio" name="modify-type" id="cal-modify-type-none" value="" /></div>
+        <div><label for="cal-modify-type-this"><input type="radio" name="modify-type" id="cal-modify-type-this" value="this" />今回の予定だけ（<span id="cal-modify-this-date" style="font-weight: bold;"></span>）</label></div>
+        <div><label for="cal-modify-type-after"><input type="radio" name="modify-type" id="cal-modify-type-after" value="after" /><span style="font-weight: bold;"><span id="cal-modify-after-date"></span>以降</span>の予定</label></div>
+        <div><label for="cal-modify-type-all"><input type="radio" name="modify-type" id="cal-modify-type-all" value="all" />すべての予定</label></div>
+        </div>
+    </fieldset>
+    </form>
+</div>
+
+</body>
+</html>

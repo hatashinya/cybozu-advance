@@ -1,0 +1,394 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Cybozu Advance</title>
+<link type="text/css" href="jquery/css/redmond/jquery-ui-1.8.6.custom.css" rel="stylesheet" />	
+<link type="text/css" href="jquery/plugins/fullcalendar/fullcalendar.css" rel="stylesheet" />
+<link type="text/css" href="jquery/plugins/jquery-treeview/jquery.treeview.css" rel="stylesheet" />
+<link type="text/css" href="jquery/plugins/jquery-treeview-menu/jquery-treeview-menu.css" rel="stylesheet" />
+<style type="text/css">
+body { font-size: 80%; margin-top: 0; }
+fieldset { margin:0; padding: 0; border:0; }
+div#header { margin-bottom: 1em; padding: 0 0.5em; }
+div#header-right { margin: 0.5em 0; }
+div#header a { padding: .3em .5em; margin-left: .5em; text-decoration: none; }
+img#logo { margin: 0.5em 0; }
+
+div.form-field { margin: 0.5em; }
+label.form-field-label { display:block; }
+input.ui-widget-content { padding: .2em; }
+div.ui-widget-content { padding: .2em; }
+
+div#cal-view { text-align: center; }
+div#cal-view-menubar { margin: 0.5em; }
+table#cal-view-table { width: 100%; border-collapse: collapse; }
+table#cal-view-table th { width: 10%; border: 1px solid #eee; padding: .2em; text-align: right; }
+table#cal-view-table td { border: 1px solid #eee; padding: .2em; text-align: left; font-family: ＭＳ ゴシック; }
+
+div.cal-view-follow-item { margin: 0.5em 0; border-top: 1px solid #eee; }
+div.cal-view-follow-info { margin-top: 0.5em; }
+span.cal-view-follow-creator { font-weight: bold; }
+span.cal-view-follow-created { margin-left: 1em; }
+div.cal-view-follow-text { margin-top: 0.5em; }
+a.cal-view-follow-del { padding: .2em .5em; text-decoration: none; display: block; float: right; }
+
+div.user-calendar { padding: 0.3em 0 0.3em 0; }
+span.user-calendar-name { font-size: larger; }
+.fc-event, .fc-agenda .fc-event-time, .fc-event a { background-color: #9ff; border-color: #366; color: #333; }
+.event-repeat, .fc-agenda .event-repeat .fc-event-time, .event-repeat a { background-color: #fc6; border-color: #363; color: #333; }
+.event-allday, .fc-agenda .event-allday .fc-event-time, .event-allday a { background-color: #fcc; border-color: #366; color: #333; }
+.event-banner, .fc-agenda .event-banner .fc-event-time, .event-banner a { background-color: #cf9; border-color: #636; color: #333; }
+.event-gcal, .fc-agenda .event-gcal .fc-event-time, .event-gcal a { background-color: #36c; border-color: #36c; color: #fff; }
+</style>
+<script type="text/javascript" src="jquery/js/jquery-1.4.1.min.js"></script>
+<script type="text/javascript" src="jquery/js/jquery-ui-1.8.6.custom.min.js"></script>
+<script type="text/javascript" src="jquery/plugins/fullcalendar/fullcalendar.min.js"></script>
+<script type="text/javascript" src="jquery/plugins/fullcalendar/gcal.js"></script>
+<script type="text/javascript" src="jquery/plugins/jquery-timeRangePicker/jquery-timeRangePicker.js"></script>
+<script type="text/javascript" src="jquery/plugins/jquery-treeview/jquery.treeview.js"></script>
+<script type="text/javascript" src="jquery/plugins/jquery-treeview-menu/jquery-treeview-menu.js"></script>
+<script type="text/javascript" src="jquery/plugins/jquery-groupedItemPicker/jquery-groupedItemPicker.js"></script>
+<script type="text/javascript" src="lib/cybozu-connect/utility.js"></script>
+<script type="text/javascript" src="lib/cybozu-connect/core.js"></script>
+<script type="text/javascript" src="lib/cybozu-connect/base.js"></script>
+<script type="text/javascript" src="lib/cybozu-connect/schedule.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/utility.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/header.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/login.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/calendar.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/calendar-dragdrop.js"></script>
+<script type="text/javascript" src="lib/cybozu-advance/peoplePicker.js"></script>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var header = new CBLabs.CybozuAdvance.Header("#header", { url: cybozuURL });
+    });
+</script>
+</head>
+<body>
+
+<div id="header" class="ui-state-default ui-corner-all">
+    <div id="header-right" style="float: right;">
+        <span id="login-info-displayname" >&nbsp;</span>
+        <a id="personal-settings" href="#" class="ui-widget-content ui-corner-all ui-state-default" style="display: none;">個人設定</a>
+        <a id="logout" href="#" class="ui-widget-content ui-corner-all ui-state-default">ログイン</a>
+    </div>
+    <img id="logo" src="lib/cybozu-advance/images/cybozu_logo80x20.gif" align="absmiddle" />
+    <a id="toppage-link" class="ui-widget-content ui-corner-all ui-state-default">トップページ</a>
+</div>
+
+<div id="login-form" title="ログイン" style="display: none">
+	<form>
+        <div class="form-field">
+		<label for="name" class="form-field-label">ログイン名</label>
+		<input type="text" name="name" id="login-form-username" class="ui-widget-content ui-corner-all" />
+        </div>
+        <div class="form-field">
+		<label for="password" class="form-field-label">パスワード</label>
+		<input type="password" name="password" id="login-form-password" value="" class="ui-widget-content ui-corner-all" />
+        </div>
+	</form>
+</div>
+
+<div id="personal-settings-form" title="個人設定" style="display: none;">
+    <form>
+        <div class="form-field">
+        <label for="cal-default-view" class="form-field-label">カレンダーの初期画面</label>
+        <select name="cal-default-view" id="cal-default-view" class="ui-widget-content ui-cordern-all">
+            <option value="basicWeek">グループ週表示</option>
+            <option value="month">月表示</option>
+            <option value="agendaWeek" selected="selected">週表示</option>
+            <option value="agendaDay">日表示</option>
+        </select>
+        </div>
+        <div class="form-field">
+		<label for="cybozu-url" class="form-field-label">サイボウズ Office 8、9、または ガルーン 3 のURL</label>
+		<div id="cybozu-url" class="ui-widget-content ui-corner-all" style="width: 100%; color: #666;"></div>
+        </div>
+        <div class="form-field">
+		<label for="gcal-feed" class="form-field-label">Google Calendar の XML フィード URL</label>
+		<input type="text" name="gcal-feed" id="gcal-feed" class="ui-widget-content ui-corner-all" style="width: 100%;" />
+        <div style="font-size: smaller">設定すると、Google Calendar の予定を重ね合わせることができます。</div>
+        </div>
+        <div class="form-field">
+        <label for ="dnd-confirm" class="form-field-label"><input type="checkbox" name="dnd-confirm" id="dnd-confirm" />ドラッグ＆ドロップ、およびドラッグ時に、確認ダイアログを表示する。</label>
+        </div>
+    </form>
+</div>
+
+<div id="cal"></div>
+
+<div id="cal-form" title="" style="display: none;">
+    <form>
+        <div id="cal-form-tabs">
+            <ul>
+            <li><a href="#normal">通常予定</a></li>
+            <li><a href="#long">翌日以降まで続く予定</a></li>
+            <li><a href="#banner">バナー予定</a></li>
+            <li><a href="#repeat">繰り返し</a></li>
+            </ul>
+            <div id="normal">
+                <div class="form-field">
+                <label for="date" class="form-field-label">日付</label>
+                <input type="text" name="date" id="cal-form-date" class="ui-widget-content ui-corner-all" />
+                </div>
+                <div class="form-field">
+                <label for="time" class="form-field-label">時刻</label>
+                <span id="cal-form-time"></span>
+                </div>
+            </div>
+            <div id="long">
+                <div class="form-field">
+                <label for="start-date" class="form-field-label">開始日時</label>
+                <input type="text" name="start-date" id="cal-form-start-date" class="ui-widget-content ui-corner-all" />
+                <span id="cal-form-start-time"></span>
+                </div>
+                <div class="form-field">
+                <label for="end-date" class="form-field-label">終了日時</label>
+                <input type="text" name="end-date" id="cal-form-end-date" class="ui-widget-content ui-corner-all" />
+                <span id="cal-form-end-time"></span>
+                </div>
+            </div>
+            <div id="banner">
+                <div class="form-field">
+                <label for="banner_start_date" class="form-field-label">日付</label>
+                <input type="text" name="banner-start-date" id="cal-form-banner-start-date" class="ui-widget-content ui-corner-all" />～<input type="text" name="banner-end-date" id="cal-form-banner-end-date" class="ui-widget-content ui-corner-all" />
+                </div>
+            </div>
+            <div id="repeat">
+                <div class="form-field">
+                <label class="form-field-label">日付</label>
+                    <div id="cal-form-modify-type">
+                    <div style="display: none;"><input type="radio" name="modify-type" id="cal-form-modify-type-none" value="" /></div>
+                    <div><label for="cal-form-modify-type-this"><input type="radio" name="modify-type" id="cal-form-modify-type-this" value="this" />今回だけ（<span class="cal-form-selected-date" style="font-weight: bold;"></span>）</label></div>
+                        <div style="padding: 0.5em 0 0.5em 2em;">
+                        <span>&rarr; 日付 <input type="text" name="modify-date" id="cal-form-modify-date" class="ui-widget-content ui-corner-all" /></span>
+                        </div>
+                    <hr style="height: 1px; color:#ccc;" />
+                    <div><label for="cal-form-modify-type-after"><input type="radio" name="modify-type" id="cal-form-modify-type-after" value="after" /><span style="font-weight: bold;"><span class="cal-form-selected-date"></span>以降</span>の予定</label></div>
+                    <div><label for="cal-form-modify-type-all"><input type="radio" name="modify-type" id="cal-form-modify-type-all" value="all" />すべての予定</label></div>
+                    </div>
+                    <div style="padding: 0.5em 2em;">
+                        <div class="form-field">
+                        <label class="form-field-label">繰り返し条件</label>
+                        <div><label for="cal-form-repeat-type-day"><input type="radio" name="repeat-type" id="cal-form-repeat-type-day" value="day" />毎日</label></div>
+                        <div><label for="cal-form-repeat-type-weekday"><input type="radio" name="repeat-type" id="cal-form-repeat-type-weekday" value="weekday" />毎日（土日を除く）</label></div>
+                        <div><label for="cal-form-repeat-type-week"><input type="radio" name="repeat-type" id="cal-form-repeat-type-week" value="week" /></label><select name="week-type" id="cal-form-week-type" class="ui-widget-content">
+                            <option value="week">毎週</option>
+                            <option value="1stweek">毎月 第1</option>
+                            <option value="2ndweek">毎月 第2</option>
+                            <option value="3rdweek">毎月 第3</option>
+                            <option value="4thweek">毎月 第4</option>
+                            <option value="lastweek">毎月 最終</option>
+                        </select><select name="week" id="cal-form-week" class="ui-widget-content">
+                            <option value="0">日曜日</option>
+                            <option value="1">月曜日</option>
+                            <option value="2">火曜日</option>
+                            <option value="3">水曜日</option>
+                            <option value="4">木曜日</option>
+                            <option value="5">金曜日</option>
+                            <option value="6">土曜日</option>
+                        </select></div>
+                        <div><label for="cal-form-repeat-type-month"><input type="radio" name="repeat-type" id="cal-form-repeat-type-month" value="month" />毎月</label><select name="day" id="cal-form-day" class="ui-widget-content">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                            <option>13</option>
+                            <option>14</option>
+                            <option>15</option>
+                            <option>16</option>
+                            <option>17</option>
+                            <option>18</option>
+                            <option>19</option>
+                            <option>20</option>
+                            <option>21</option>
+                            <option>22</option>
+                            <option>23</option>
+                            <option>24</option>
+                            <option>25</option>
+                            <option>26</option>
+                            <option>27</option>
+                            <option>28</option>
+                            <option>29</option>
+                            <option>30</option>
+                            <option>31</option>
+                            <option value="0">月末</option>
+                        </select></div>
+                        </div>
+                        <div class="form-field">
+                        <label for="repeat-start-date" class="form-field-label">期間</label>
+                        <input type="text" name="repeat-start-date" id="cal-form-repeat-start-date" class="ui-widget-content ui-corner-all" />～<input type="text" name="repeat-end-date" id="cal-form-repeat-end-date" class="ui-widget-content ui-corner-all" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-field">
+                <label for="repeat-time" class="form-field-label">時刻</label>
+                <span id="cal-form-repeat-time"></span>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 0 1.5em; ">
+            <div class="form-field">
+            <label for="cal-form-plan" class="form-field-label">予定</label>
+            <select name="plan" id="cal-form-plan" class="ui-widget-content">
+            </select><input type="text" name="detail" id="cal-form-detail" class="ui-widget-content ui-corner-all" style="width: 30em;" />
+            </div>
+            <div class="form-field">
+            <label for="cal-form-memo" class="form-field-label">メモ</label>
+            <textarea name="memo" id="cal-form-memo" class="ui-widget-content ui-corner-all" style="width: 40em; height: 5em;"></textarea>
+            </div>
+            <div class="form-field">
+            <label for="cal-form-members" class="form-field-label">参加者</label>
+            <div id="cal-form-members"></div>
+            </div>
+            <div class="form-field" id="cal-form-facilities-field">
+            <label for="cal-form-facilities" class="form-field-label">設備</label>
+            <div id="cal-form-facilities"></div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="cal-view" title="予定の詳細" style="display: none;">
+    <div id="cal-view-menubar">
+        <button id="cal-view-modify">変更する</button>
+        <button id="cal-view-delete">削除する</button>
+        <button id="cal-view-leave">この予定から抜ける</button>
+        <button id="cal-view-reuse">再利用する</button>
+        <a id="cal-view-src" href="" target="_blank">元ページ</a>
+    </div>
+    <table id="cal-view-table" class="ui-widget ui-widget-content">
+        <tr>
+            <th>日時</th>
+            <td id="cal-view-when"></td>
+        </tr>
+        <tr>
+            <th>予定</th>
+            <td id="cal-view-title"></td>
+        </tr>
+        <tr valign="top">
+            <th>メモ</th>
+            <td id="cal-view-memo"></td>
+        </tr>
+        <tr valign="top">
+            <th>参加者</th>
+            <td id="cal-view-members"></td>
+        </tr>
+        <tr valign="top">
+            <th>設備</th>
+            <td id="cal-view-facilities"></td>
+        </tr>
+        <tr valign="top">
+            <th>フォロー</th>
+            <td id="cal-view-follow">
+                <form id="cal-view-follow-form">
+                <textarea name="follow" id="cal-view-follow-text" class="ui-widget-content ui-corner-all" style="width: 100%; height: 7em;"></textarea>
+                <div><input type="button" id="cal-view-follow-write" value="書き込む" /></div>
+                </form>
+                <div id="cal-view-follow-list"></div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="simple-confirm" title="" style="display: none;">
+    <p>
+        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+        <span id="simple-confirm-message"></span>
+    </p>
+</div>
+
+<div id="simple-loading" title="" style="display: none;">
+    <p style="text-align: center;">
+        <img src="lib/cybozu-advance/images/loading.gif" align="absmiddle" />
+        <span id="simple-loading-message"></span>
+    </p>
+</div>
+
+<div id="cal-delete-shared-confirm" title="予定の削除" style="display: none;">
+    <p>
+        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+        予定を削除します。よろしいですか？
+    </p>
+    <form>
+    <fieldset>
+        <div class="form-field">
+        <label class="form-field-label">削除する参加者</label>
+        <div style="display: none;"><input type="radio" name="delete-members" id="cal-delete-members-none" value="" /></div>
+        <div><label for="cal-delete-members-all"><input type="radio" name="delete-members" id="cal-delete-members-all" value="all" />全参加者の予定を削除する</label></div>
+        <div><label for="cal-delete-members-one"><input type="radio" name="delete-members" id="cal-delete-members-one" value="one" />予定から自分だけを削除する</label></div>
+        </div>
+    </fieldset>
+    </form>
+</div>
+
+<div id="cal-modify-repeat-confirm" title="" style="display: none;">
+    <p>
+        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+        <span id="cal-modify-message"></span>
+    </p>
+    <form>
+    <fieldset>
+        <div class="form-field">
+        <div style="display: none;"><input type="radio" name="modify-type" id="cal-modify-type-none" value="" /></div>
+        <div><label for="cal-modify-type-this"><input type="radio" name="modify-type" id="cal-modify-type-this" value="this" />今回の予定だけ（<span id="cal-modify-this-date" style="font-weight: bold;"></span>）</label></div>
+        <div><label for="cal-modify-type-after"><input type="radio" name="modify-type" id="cal-modify-type-after" value="after" /><span style="font-weight: bold;"><span id="cal-modify-after-date"></span>以降</span>の予定</label></div>
+        <div><label for="cal-modify-type-all"><input type="radio" name="modify-type" id="cal-modify-type-all" value="all" />すべての予定</label></div>
+        </div>
+    </fieldset>
+    </form>
+</div>
+
+<div id="cal-delete-repeat-confirm" title="繰り返し予定の削除" style="display: none;">
+    <p>
+        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+        予定を削除する範囲を指定してください。
+    </p>
+    <form>
+    <fieldset>
+        <div class="form-field">
+        <label class="form-field-label">削除する範囲</label>
+        <div style="display: none;"><input type="radio" name="delete-type" id="cal-delete-type-none" value="" /></div>
+        <div><label for="cal-delete-type-this"><input type="radio" name="delete-type" id="cal-delete-type-this" value="this" />今回の予定だけ（<span id="cal-delete-this-date" style="font-weight: bold;"></span>）</label></div>
+        <div><label for="cal-delete-type-after"><input type="radio" name="delete-type" id="cal-delete-type-after" value="after" /><span style="font-weight: bold;"><span id="cal-delete-after-date"></span>以降</span>の予定</label></div>
+        <div><label for="cal-delete-type-all"><input type="radio" name="delete-type" id="cal-delete-type-all" value="all" />すべての予定</label></div>
+        </div>
+    </fieldset>
+    </form>
+</div>
+
+<div id="cal-delete-sr-confirm" title="繰り返し予定の削除" style="display: none;">
+    <p>
+        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+        予定を削除する参加者、および範囲を指定してください。
+    </p>
+    <form>
+    <fieldset>
+        <div class="form-field">
+        <label class="form-field-label">削除する参加者</label>
+        <div style="display: none;"><input type="radio" name="delete-members" id="cal-delete-sr-members-none" value="" /></div>
+        <div><label for="cal-delete-sr-members-all"><input type="radio" name="delete-members" id="cal-delete-sr-members-all" value="all" />全参加者の予定を削除する</label></div>
+        <div><label for="cal-delete-sr-members-one"><input type="radio" name="delete-members" id="cal-delete-sr-members-one" value="one" />予定から自分だけを削除する</label></div>
+        </div>
+        <div class="form-field">
+        <label class="form-field-label">削除する範囲</label>
+        <div style="display: none;"><input type="radio" name="delete-type" id="cal-delete-sr-type-none" value="" /></div>
+        <div><label for="cal-delete-sr-type-this"><input type="radio" name="delete-type" id="cal-delete-sr-type-this" value="this" />今回の予定だけ（<span id="cal-delete-sr-this-date" style="font-weight: bold;"></span>）</label></div>
+        <div><label for="cal-delete-sr-type-after"><input type="radio" name="delete-type" id="cal-delete-sr-type-after" value="after" /><span style="font-weight: bold;"><span id="cal-delete-sr-after-date"></span>以降</span>の予定</label></div>
+        <div><label for="cal-delete-sr-type-all"><input type="radio" name="delete-type" id="cal-delete-sr-type-all" value="all" />すべての予定</label></div>
+        </div>
+    </fieldset>
+    </form>
+</div>
+
+</body>
+</html>
