@@ -114,4 +114,4 @@ Copyright (C) 2011 [Cybozu Labs, Inc.](http://labs.cybozu.co.jp/)
 
 備考
 ----
-* Cybozu Advance はサイボウズの*サポートの対象外*となります。あらかじめご了承ください。
+* Cybozu Advance はサイボウズの **サポートの対象外** となります。あらかじめご了承ください。
