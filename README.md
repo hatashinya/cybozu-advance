@@ -33,7 +33,7 @@ Cybozu Advance はサイボウズの連携APIを利用したWebアプリケー�
 
 特徴
 ----
-* HTML と !JavaScript のみで実装されています。
+* HTML と JavaScript のみで実装されています。
 * ドラッグ＆ドロップによる操作が行えます。
 * Google Calendar を重ね合わせることができます。
 * タイムゾーンに対応しています。
