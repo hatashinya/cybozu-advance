@@ -9,6 +9,10 @@ Cybozu Advance
 ----
 Cybozu Advance はサイボウズの連携APIを利用したWebアプリケーションです。
 
+ライセンス
+---------
+[GNU GPL v2](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+
 更新情報
 --------
 * 1.1.4 (2012/11/16)
