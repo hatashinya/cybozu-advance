@@ -1,7 +1,7 @@
 Cybozu Advance
 ==============
 
-ラッグ＆ドロップ可能なスケジュール
+ドラッグ＆ドロップ可能なスケジュール
 
 ![Cybozu Advance](http://developer.cybozu.co.jp/photos/uncategorized/2011/02/01/cybozuadvance_5.png)
 
